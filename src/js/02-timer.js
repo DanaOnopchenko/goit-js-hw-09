@@ -17,6 +17,8 @@ const refs = {
 // console.log(refs)
 
 let deadline = null;
+refs.btnStart.disabled = true;
+
 
 const options = {
   enableTime: true,
@@ -97,8 +99,7 @@ const timer = new Timer({
 flatpickr(refs.input, options);
 
 function onChangeTime(selectedDates) { 
-  
-    deadline = selectedDates[0];
+        deadline = selectedDates[0];
     // console.log(`deadline:`, deadline)
   if (deadline < Date.now()) { 
     Notify.failure('Please choose a date in the future');

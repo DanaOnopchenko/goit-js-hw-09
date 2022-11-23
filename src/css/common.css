@@ -16,3 +16,27 @@ img {
   display: block;
   max-width: 100%;
 }
+
+.timer {
+  margin-top: 25px;
+}
+.field {
+  padding: 15px;
+  margin: 5px;
+  border-radius: 5px;
+  background-color: #0b146b;
+  display: inline-block;
+  text-align: center;
+}
+.value {
+  display: inline-block;
+  color: #ffffff;
+  font-size: 55px;
+}
+.label {
+  display: block;
+  padding-top: 5px;
+  font-size: 15px;
+  text-transform: uppercase;
+  color: #f2a200;
+}
