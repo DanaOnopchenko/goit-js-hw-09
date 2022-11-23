@@ -1,10 +1,11 @@
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 
 // const inputRefs = document.querySelector('#datetime-picker');
+
 const refs = {
   input: document.querySelector('#datetime-picker'),
   btnStart: document.querySelector('[data-start]'),
@@ -14,7 +15,6 @@ const refs = {
   dataSecond: document.querySelector('[data-seconds]'),  
 }
 // console.log(refs)
-
 
 let deadline = null;
 
@@ -29,13 +29,15 @@ const options = {
   },
 };
 
-
 class Timer {
   constructor({ onTick }) {
     this.intervalId = null;
     this.isActive = false;
     this.onTick = onTick;
-      
+     }
+  init() { 
+    const time = this.convertMs(0);
+    this.onTick(time);
   }
   start() {
     if (this.isActive) {
@@ -46,21 +48,24 @@ class Timer {
     this.intervalId = setInterval(() => {
       const currentTime = Date.now();
       const deltaTime = deadline - currentTime;
-      const time = this.convertMs(deltaTime);
+      let time = this.convertMs(deltaTime);
       if (deltaTime >= 0) { 
         this.onTick(time);
         return
+      } if (deltaTime <= 0) { 
+        clearInterval(this.intervalId);
+      this.isActive = false;
+      time = this.convertMs(0);
+        this.onTick(time);
+        return;
       }
-      clearInterval(this.intervalId);
-    this.isActive = false;
-    this.onTick(0);
-  
-    }, 1000)
+          }, 1000)
   };
  
-  pad(value) {
+  addLeadingZero(value) {
     return String(value).padStart(2, '0');
-  }
+  };
+
   convertMs(ms) {
     // Number of milliseconds per unit of time
     const second = 1000;
@@ -69,108 +74,51 @@ class Timer {
     const day = hour * 24;
 
     // Remaining days
-    const days = this.pad(Math.floor(ms / day));
+    const days = this.addLeadingZero(Math.floor(ms / day));
     // Remaining hours
-    const hours = this.pad(Math.floor((ms % day) / hour));
+    const hours = this.addLeadingZero(Math.floor((ms % day) / hour));
     // Remaining minutes
-    const minutes = this.pad(Math.floor(((ms % day) % hour) / minute));
+    const minutes = this.addLeadingZero(Math.floor(((ms % day) % hour) / minute));
     // Remaining seconds
-    const seconds = this.pad(Math.floor((((ms % day) % hour) % minute) / second));
+    const seconds = this.addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
 
     return { days, hours, minutes, seconds };
   }
-}
+};
 
 refs.btnStart.addEventListener('click', () => {
   timer.start();
 });
 
-
-
 const timer = new Timer({
   onTick: updateTimer,
 });
 
-
 flatpickr(refs.input, options);
-
 
 function onChangeTime(selectedDates) { 
   
     deadline = selectedDates[0];
-    console.log(`deadline:`, deadline)
-    
-    
-  
-  
-  // if (deadline <= Date.now()) { 
-  //   window.alert(`Please choose a date in the future`)
-
-  // }
+    // console.log(`deadline:`, deadline)
+  if (deadline < Date.now()) { 
+    Notify.failure('Please choose a date in the future');
+   refs.btnStart.disabled = true;
+    return;
+  } else {
+    refs.btnStart.disabled = false;
+    return;
+  }
+   
 }
 
 function updateTimer({ days, hours, minutes, seconds }) { 
   refs.dataDay.textContent = `${days}`;
   refs.dataHours.textContent = `${hours}`;
   refs.dataMinute.textContent = `${minutes}`;
-  refs.dataSecond.textContent = `${seconds }`;
+  refs.dataSecond.textContent = `${seconds}`;
 }
 
 
-// refs.btnStart.addEventListener('click', () => {
-//   timer.start()
-// });
-
-// function pad(value) { 
-//   return String(value).padStart(2, '0');
-// }
-// function convertMs(ms) {
-//   // Number of milliseconds per unit of time
-//   const second = 1000;
-//   const minute = second * 60;
-//   const hour = minute * 60;
-//   const day = hour * 24;
-
-//   // Remaining days
-//   const days =pad(Math.floor(ms / day)) ;
-//   // Remaining hours
-//   const hours = pad(Math.floor((ms % day) / hour));
-//   // Remaining minutes
-//   const minutes =pad(Math.floor(((ms % day) % hour) / minute)) ;
-//   // Remaining seconds
-//   const seconds = pad(Math.floor((((ms % day) % hour) % minute) / second));
-
-//   return { days, hours, minutes, seconds };
-// }
-
-
-// const timer = {
-//   intervalId: null,
-//   isActive: false,
-//   start() {
-//     if (this.isActive) { 
-//       return;
-//     }
-//     const startTime = Date.now();
-//     this.isActive = true;
-
-//   this.intervalId = setInterval(() => { 
-//       const currentTime = Date.now();
-      
-//       const deltaTime = currentTime - startTime;
-//       const time = convertMs(deltaTime)
-   
-//     updateTimer(time);
-//     },1000)
-//    }
-// }
-
-// function updateTimer({ days, hours, minutes, seconds }) { 
-//   refs.dataDay.textContent = `${days}`;
-//   refs.dataHours.textContent = `${hours}`;
-//   refs.dataMinute.textContent = `${minutes}`;
-//   refs.dataSecond.textContent = `${seconds }`;
-// }
 
 
 
